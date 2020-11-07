@@ -12,6 +12,8 @@
     <% for(let post of allPosts) { %>
         <ul><h1><%= post.title %></h1></ul>
         <ul><p><%= post.description %></p></ul>
+        <ul><a href="viewPost/<%= post._id %>"><button>View</button></a></ul>
     <% } %>
+
 </body>
 </html>
