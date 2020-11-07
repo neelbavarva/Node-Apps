@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog</title>
+</head>
+<body>
+    <h1>Home.ejs</h1>
+    <a href="/newPost"><button>Add</button></a>
+
+    <% for(let post of allPosts) { %>
+        <ul><h1><%= post.title %></h1></ul>
+        <ul><p><%= post.description %></p></ul>
+    <% } %>
+</body>
+</html>
