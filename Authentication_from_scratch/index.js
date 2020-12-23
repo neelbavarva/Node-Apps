@@ -3,6 +3,7 @@ const app = express()
 const mongoose = require('mongoose')
 const User = require('./models/user')
 const bcrypt = require('bcrypt')
+const session = require('express-session')
 
 mongoose.connect('mongodb://localhost:27017/authdemo', {useNewUrlParser: true, useUnifiedTopology: true})
     .then(() =>{
@@ -14,8 +15,19 @@ mongoose.connect('mongodb://localhost:27017/authdemo', {useNewUrlParser: true, u
 
 
 app.use(express.urlencoded({ extended: true }));
+app.use(session({
+    secret: 'cookie_secret',
+    proxy: true,
+    resave: true,
+    saveUninitialized: true
+
+}))
 app.set('view engine', 'ejs')
 app.set('views', 'views')
+
+app.get('/', (req, res) => {
+    res.send("Registered")
+})
 
 app.get('/register', (req,res) => {
     res.render('register')
@@ -28,13 +40,39 @@ app.post('/register', async (req,res) => {
         username,
         password: hash
     })
-
     await user.save()
-    res.send(hash);
+    req.session.user_id = user._id;
+    console.log(req.session.user_id)
+    res.redirect('/')
+})
+
+app.get('/login', (req, res) => {
+    res.render('login')
+})
+
+app.post('/login', async (req, res) => {
+    const {username, password} = req.body;
+    const user = await User.findOne({username});
+    const validPassword = await bcrypt.compare(password, user.password);
+    if(validPassword) {
+        req.session.user_id = user._id;
+        res.redirect('/secret');
+    } else {
+        res.redirect('/login');
+    }
+})
+
+app.post('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/login');
 })
 
 app.get('/secret', (req, res) =>{
-    res.send("This is secret")
+    if(!req.session.user_id){
+        res.redirect('/login')
+    }
+
+    res.render('secret')
 })
 
 app.listen(3000, () =>{
